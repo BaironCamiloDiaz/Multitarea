@@ -1,0 +1,84 @@
+//CODIGO CON SENSORES DE LUZ , TEMPERATURA.
+
+
+//INTEGRANTES : BRAYAN BENAVIDES
+//              ALEXIS SICLOS
+//              BAIRON PALECHOR 
+
+
+#include "DHTStable.h"
+#include <LiquidCrystal.h>
+
+#define DHTPIN 5
+
+#define PHOTORESISTOR_PIN A0
+
+DHTStable dht;
+
+int photocellValue = 0;
+
+LiquidCrystal lcd(12, 11, 10, 9, 8, 7);
+
+// Prototipos de función
+void readLight();
+void readTemperature();
+
+void setup()
+{
+  Serial.begin(9600);
+  Serial.println("Iniciando");
+
+  lcd.begin(16, 2); // Inicializa la pantalla LCD con 16 columnas y 2 filas
+}
+
+void loop()
+{
+  readLight(); // Lee la luz
+  readTemperature(); // Lee la temperatura
+  delay(1000); // Espera 1 segundo
+}
+
+// Función para leer la temperatura
+void readTemperature()
+{
+  Serial.print("DHT11 - ");
+  int chk = dht.read11(DHTPIN); // Lee los datos del sensor DHT11 en el pin especificado
+
+  switch (chk)
+  {
+    case DHTLIB_OK:
+      Serial.print("OK - "); // Lectura exitosa
+      break;
+    case DHTLIB_ERROR_CHECKSUM:
+      Serial.print("Error de suma de comprobación - "); // Error en la suma de comprobación de los datos
+      break;
+    case DHTLIB_ERROR_TIMEOUT:
+      Serial.print("Error de tiempo de espera - "); // Error de tiempo de espera en la comunicación con el sensor
+      break;
+    default:
+      Serial.print("Error desconocido - "); // Otro error desconocido
+      break;
+  }
+
+  // Actualizar la pantalla LCD con la humedad y temperatura
+  lcd.setCursor(0, 1);
+  lcd.print("H: ");
+  lcd.print(dht.getHumidity()); // Obtiene la humedad del sensor DHT11
+  lcd.print("%");
+
+  lcd.setCursor(8, 1);
+  lcd.print("T: ");
+  lcd.print(dht.getTemperature()); // Obtiene la temperatura del sensor DHT11
+  lcd.print("C");
+}
+
+// Función para leer la luz
+void readLight()
+{
+  // Actualizar la pantalla LCD con el valor del fotocélula
+  lcd.setCursor(0, 0);
+  lcd.print("Photocell: ");
+  photocellValue = analogRead(PHOTORESISTOR_PIN); // Lee el valor analógico del fotocélula
+  lcd.print(photocellValue);
+}
+
